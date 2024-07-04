@@ -95,16 +95,10 @@ int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r)
     mclBnG1 rg, vg, rp, tmp;
     int b1, b2;
     mclBnG1_mul(&rg, &G, r);
-    // char rg_str[1000];
-    // mclBnG1_getStr(rg_str, 1000, &rg, 10);
-    // printf("* %s\n", rg_str);
     b1 = mclBnG1_isEqual(&cm->c0, &rg);
     mclBnG1_mul(&vg, &G, v);
     mclBnG1_mul(&rp, &P, r);
     mclBnG1_add(&tmp, &vg, &rp);
-    // char tmp_str[1000];
-    // mclBnG1_getStr(tmp_str, 1000, &tmp, 10);
-    // printf("* %s\n", tmp_str);
     b2 = mclBnG1_isEqual(&cm->c1, &tmp);
     return b1 && b2;
 }
@@ -133,5 +127,32 @@ int vfAuth(commit_t cm, signature_t sigma, vk_t vk)
     mclBn_pairing(&px1_hat, &P, &vk->x1_hat);
     mclBnGT_mul(&tmp1, &gx0_hat, &px1_hat);
     b3 = mclBnGT_isEqual(&ts_hat, &tmp1);
+    printf("%d %d %d", b1, b2, b3);
     return b1 && b2 && b3;
+}
+
+void rdmAC(commit_t cm, signature_t sigma, mclBnFr *r_)
+{
+    mclBnG1 r_g, r_p, r_t, z_;
+    mclBnFr s_, s_inv_;
+    // 随机选取r_计算承诺cm_
+    mclBnFr_setByCSPRNG(r_);
+    // 计算承诺cm_
+    mclBnG1_mul(&r_g, &G, r_);
+    mclBnG1_add(&cm_->c0, &cm->c0, &r_g);
+    mclBnG1_mul(&r_p, &P, r_);
+    mclBnG1_add(&cm_->c1, &cm->c1, &r_p);
+    // 随机选取s_计算签名sigma_
+    mclBnFr_setByCSPRNG(&s_);
+    mclBnFr_inv(&s_inv_, &s_);
+    // 计算签名sigma_中的z
+    mclBnG1_mul(&r_t, &sigma->t, r_);
+    mclBnG1_add(&z_, &sigma->z, &r_t);
+    mclBnG1_mul(&sigma_->z, &z_, &s_inv_);
+    // 计算签名sigma_中的s
+    mclBnG1_mul(&sigma_->s, &G, &s_);
+    // 计算签名sigma_中的s_hat
+    mclBnG2_mul(&sigma_->s_hat, &G_hat, &s_);
+    // 计算签名sigma_中的t
+    mclBnG1_mul(&sigma_->t, &sigma->t, &s_inv_);
 }
