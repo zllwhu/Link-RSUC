@@ -9,19 +9,19 @@ const char G_STR[] = "1 1 2";
 const char P_STR[] = "1 1368015179489954701390400359078579693043519447331113978918064868415326638035 9918110051302171585080402603319702774565515993150576347155970296011118125764";
 const char G_HAT_STR[] = "1 10857046999023057135944570762232829481370756359578518086990519993285655852781 11559732032986387107991004021392285783925812861821192530917403151452391805634 8495653923123431417604973247489272438418190587263600148770280649306958101930 4082367875863433681332203403145435568316851327593401208105741076214120093531";
 
-sk_t sk;
-vk_t vk;
+sk_t SK;
+vk_t VK;
 mclBnG1 G, P;
 mclBnG2 G_hat;
-commit_t cm;
-commit_t cm_;
-commit_t cm_new;
-signature_t sigma;
-signature_t sigma_;
-signature_t sigma_new;
-mclBnFr r;
-mclBnFr r_;
-mclBnFr v;
+commit_t CM;
+commit_t CM_;
+commit_t CM_new;
+signature_t SIGMA;
+signature_t SIGMA_;
+signature_t SIGMA_new;
+mclBnFr R;
+mclBnFr R_;
+mclBnFr V;
 
 void util_function()
 {
@@ -36,26 +36,26 @@ void init()
     mclBnG1_setStr(&G, G_STR, strlen(G_STR), 10);
     mclBnG1_setStr(&P, P_STR, strlen(P_STR), 10);
     mclBnG2_setStr(&G_hat, G_HAT_STR, strlen(G_HAT_STR), 10);
-    // 初始化承诺cm, cm_, cm_new
-    commit_new(cm);
-    commit_new(cm_);
-    commit_new(cm_new);
-    // 初始化签名sigma, sigma_, sigma_new
-    signature_new(sigma);
-    signature_new(sigma_);
-    signature_new(sigma_new);
+    // 初始化承诺CM, CM_, CM_new
+    commit_new(CM);
+    commit_new(CM_);
+    commit_new(CM_new);
+    // 初始化签名SIGMA, SIGMA_, SIGMA_new
+    signature_new(SIGMA);
+    signature_new(SIGMA_);
+    signature_new(SIGMA_new);
 }
 
 void keyGen()
 {
     // 初始化私钥sk
-    sk_new(sk);
-    mclBnFr_setByCSPRNG(&sk->x0);
-    mclBnFr_setByCSPRNG(&sk->x1);
+    sk_new(SK);
+    mclBnFr_setByCSPRNG(&SK->x0);
+    mclBnFr_setByCSPRNG(&SK->x1);
     // 初始化公钥vk
-    vk_new(vk);
-    mclBnG2_mul(&vk->x0_hat, &G_hat, &sk->x0);
-    mclBnG2_mul(&vk->x1_hat, &G_hat, &sk->x1);
+    vk_new(VK);
+    mclBnG2_mul(&VK->x0_hat, &G_hat, &SK->x0);
+    mclBnG2_mul(&VK->x1_hat, &G_hat, &SK->x1);
 }
 
 void authCom(mclBnFr *v, sk_t sk, mclBnFr *r)
@@ -63,31 +63,31 @@ void authCom(mclBnFr *v, sk_t sk, mclBnFr *r)
     mclBnG1 vg, rp;
     mclBnFr s, s_inv;
     mclBnG1 z, z1, z2, z3, t;
-    // 随机选取r计算承诺cm
+    // 随机选取r计算承诺CM
     mclBnFr_setByCSPRNG(r);
-    // 计算承诺cm
-    mclBnG1_mul(&cm->c0, &G, r);
+    // 计算承诺CM
+    mclBnG1_mul(&CM->c0, &G, r);
     mclBnG1_mul(&vg, &G, v);
     mclBnG1_mul(&rp, &P, r);
-    mclBnG1_add(&cm->c1, &vg, &rp);
-    // 随机选取s计算签名sigma
+    mclBnG1_add(&CM->c1, &vg, &rp);
+    // 随机选取s计算签名SIGMA
     mclBnFr_setByCSPRNG(&s);
     mclBnFr_inv(&s_inv, &s);
-    // 计算签名sigma中的z
-    mclBnG1_mul(&z1, &cm->c0, &sk->x0);
-    mclBnG1_mul(&z2, &cm->c1, &sk->x1);
+    // 计算签名SIGMA中的z
+    mclBnG1_mul(&z1, &CM->c0, &sk->x0);
+    mclBnG1_mul(&z2, &CM->c1, &sk->x1);
     mclBnG1_add(&z3, &z1, &G);
     mclBnG1_add(&z, &z3, &z2);
-    mclBnG1_mul(&sigma->z, &z, &s_inv);
-    // 计算签名sigma中的s
-    mclBnG1_mul(&sigma->s, &G, &s);
-    // 计算签名sigma中的s_hat
-    mclBnG2_mul(&sigma->s_hat, &G_hat, &s);
-    // 计算签名sigma中的t
+    mclBnG1_mul(&SIGMA->z, &z, &s_inv);
+    // 计算签名SIGMA中的s
+    mclBnG1_mul(&SIGMA->s, &G, &s);
+    // 计算签名SIGMA中的s_hat
+    mclBnG2_mul(&SIGMA->s_hat, &G_hat, &s);
+    // 计算签名SIGMA中的t
     mclBnG1_mul(&z1, &G, &sk->x0);
     mclBnG1_mul(&z2, &P, &sk->x1);
     mclBnG1_add(&z3, &z1, &z2);
-    mclBnG1_mul(&sigma->t, &z3, &s_inv);
+    mclBnG1_mul(&SIGMA->t, &z3, &s_inv);
 }
 
 int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r)
@@ -127,7 +127,6 @@ int vfAuth(commit_t cm, signature_t sigma, vk_t vk)
     mclBn_pairing(&px1_hat, &P, &vk->x1_hat);
     mclBnGT_mul(&tmp1, &gx0_hat, &px1_hat);
     b3 = mclBnGT_isEqual(&ts_hat, &tmp1);
-    printf("%d %d %d", b1, b2, b3);
     return b1 && b2 && b3;
 }
 
@@ -135,24 +134,24 @@ void rdmAC(commit_t cm, signature_t sigma, mclBnFr *r_)
 {
     mclBnG1 r_g, r_p, r_t, z_;
     mclBnFr s_, s_inv_;
-    // 随机选取r_计算承诺cm_
+    // 随机选取r_计算承诺CM_
     mclBnFr_setByCSPRNG(r_);
-    // 计算承诺cm_
+    // 计算承诺CM_
     mclBnG1_mul(&r_g, &G, r_);
-    mclBnG1_add(&cm_->c0, &cm->c0, &r_g);
+    mclBnG1_add(&CM_->c0, &cm->c0, &r_g);
     mclBnG1_mul(&r_p, &P, r_);
-    mclBnG1_add(&cm_->c1, &cm->c1, &r_p);
-    // 随机选取s_计算签名sigma_
+    mclBnG1_add(&CM_->c1, &cm->c1, &r_p);
+    // 随机选取s_计算签名SIGMA_
     mclBnFr_setByCSPRNG(&s_);
     mclBnFr_inv(&s_inv_, &s_);
-    // 计算签名sigma_中的z
+    // 计算签名SIGMA_中的z
     mclBnG1_mul(&r_t, &sigma->t, r_);
     mclBnG1_add(&z_, &sigma->z, &r_t);
-    mclBnG1_mul(&sigma_->z, &z_, &s_inv_);
-    // 计算签名sigma_中的s
-    mclBnG1_mul(&sigma_->s, &G, &s_);
-    // 计算签名sigma_中的s_hat
-    mclBnG2_mul(&sigma_->s_hat, &G_hat, &s_);
-    // 计算签名sigma_中的t
-    mclBnG1_mul(&sigma_->t, &sigma->t, &s_inv_);
+    mclBnG1_mul(&SIGMA_->z, &z_, &s_inv_);
+    // 计算签名SIGMA_中的s
+    mclBnG1_mul(&SIGMA_->s, &sigma->s, &s_);
+    // 计算签名SIGMA_中的s_hat
+    mclBnG2_mul(&SIGMA_->s_hat, &sigma->s_hat, &s_);
+    // 计算签名SIGMA_中的t
+    mclBnG1_mul(&SIGMA_->t, &sigma->t, &s_inv_);
 }

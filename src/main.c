@@ -6,18 +6,18 @@ int main()
     init();
     keyGen();
     int v_int = 3;
-    mclBnFr_setInt(&v, v_int);
-    authCom(&v, sk, &r);
-    int res = vfCom(cm, &v, &r);
+    mclBnFr_setInt(&V, v_int);
+    authCom(&V, SK, &R);
+    int res = vfCom(CM, &V, &R);
     printf("vfCom验证结果: %d\n", res);
-    res = vfAuth(cm, sigma, vk);
+    res = vfAuth(CM, SIGMA, VK);
     printf("vfAuth验证结果: %d\n", res);
-    rdmAC(cm, sigma, &r_);
+    rdmAC(CM, SIGMA, &R_);
     mclBnFr rr;
-    mclBnFr_add(&rr, &r, &r_);
-    res = vfCom(cm_, &v, &rr);
+    mclBnFr_add(&rr, &R, &R_);
+    res = vfCom(CM_, &V, &rr);
     printf("vfCom验证结果: %d\n", res);
-    res = vfAuth(cm_, sigma_, vk);
+    res = vfAuth(CM_, SIGMA_, VK);
     printf("vfAuth验证结果: %d\n", res);
 
     // char cm_c0[1000];
