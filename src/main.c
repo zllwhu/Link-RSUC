@@ -1,18 +1,47 @@
 #include <stdio.h>
 #include "util.h"
 
+sk_t SK;
+vk_t VK;
+commit_t CM;
+commit_t CM_;
+commit_t CM_new;
+signature_t SIGMA;
+signature_t SIGMA_;
+signature_t SIGMA_new;
+mclBnFr R;
+mclBnFr R_;
+mclBnFr V;
+
+void init_var()
+{
+    // 初始化私钥sk
+    sk_new(SK);
+    // 初始化公钥vk
+    vk_new(VK);
+    // 初始化承诺CM, CM_, CM_new
+    commit_new(CM);
+    commit_new(CM_);
+    commit_new(CM_new);
+    // 初始化签名SIGMA, SIGMA_, SIGMA_new
+    signature_new(SIGMA);
+    signature_new(SIGMA_);
+    signature_new(SIGMA_new);
+}
+
 int main()
 {
-    init();
-    keyGen();
+    init_var();
+    init_sys();
+    keyGen(SK, VK);
     int v_int = 3;
     mclBnFr_setInt(&V, v_int);
-    authCom(&V, SK, &R);
+    authCom(CM, SIGMA, &V, SK, &R);
     int res = vfCom(CM, &V, &R);
     printf("vfCom验证结果: %d\n", res);
     res = vfAuth(CM, SIGMA, VK);
     printf("vfAuth验证结果: %d\n", res);
-    rdmAC(CM, SIGMA, &R_);
+    rdmAC(CM_, SIGMA_, CM, SIGMA, &R_);
     mclBnFr rr;
     mclBnFr_add(&rr, &R, &R_);
     res = vfCom(CM_, &V, &rr);
