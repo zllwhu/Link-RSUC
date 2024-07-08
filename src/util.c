@@ -48,11 +48,11 @@ void init()
 
 void keyGen()
 {
-    // 初始化私钥sk
+    // 初始化私钥SK
     sk_new(SK);
     mclBnFr_setByCSPRNG(&SK->x0);
     mclBnFr_setByCSPRNG(&SK->x1);
-    // 初始化公钥vk
+    // 初始化公钥VK
     vk_new(VK);
     mclBnG2_mul(&VK->x0_hat, &G_hat, &SK->x0);
     mclBnG2_mul(&VK->x1_hat, &G_hat, &SK->x1);
