@@ -134,3 +134,47 @@ void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mcl
     // 计算签名sigma_中的t
     mclBnG1_mul(&sigma_->t, &sigma->t, &s_inv_);
 }
+
+void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk_t sk)
+{
+    mclBnG1 ag, x0c0, x1c1, tmp, x0g, x1p;
+    mclBnFr s_new, s_new_inv;
+    // 计算承诺cm_new
+    cm_new->c0 = cm->c0;
+    mclBnG1_mul(&ag, &G, amt);
+    mclBnG1_add(&cm_new->c1, &cm->c1, &ag);
+    // 随机选取s_new计算签名sigma_new
+    mclBnFr_setByCSPRNG(&s_new);
+    mclBnFr_inv(&s_new_inv, &s_new);
+    // 计算签名sigma_new中的z
+    mclBnG1_mul(&x0c0, &cm->c0, &sk->x0);
+    mclBnG1_mul(&x1c1, &cm_new->c1, &sk->x1);
+    mclBnG1_add(&tmp, &x0c0, &x1c1);
+    mclBnG1_add(&tmp, &tmp, &G);
+    mclBnG1_mul(&sigma_new->z, &tmp, &s_new_inv);
+    // 计算签名sigma_new中的s
+    mclBnG1_mul(&sigma_new->s, &G, &s_new);
+    // 计算签名sigma_new中的s_hat
+    mclBnG2_mul(&sigma_new->s_hat, &G_hat, &s_new);
+    // 计算签名sigma_new中的t
+    mclBnG1_mul(&x0g, &G, &sk->x0);
+    mclBnG1_mul(&x1p, &P, &sk->x1);
+    mclBnG1_add(&tmp, &x0g, &x1p);
+    mclBnG1_mul(&sigma_new->t, &tmp, &s_new_inv);
+}
+
+int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_t vk)
+{
+    if (mclBnG1_isZero(&sigma_new->s))
+    {
+        return 0;
+    }
+    mclBnG1 ag, tmp;
+    int b1, b2, b3;
+    b1 = mclBnG1_isEqual(&cm->c0, &cm_new->c0);
+    mclBnG1_mul(&ag, &G, amt);
+    mclBnG1_add(&tmp, &ag, &cm->c1);
+    b2 = mclBnG1_isEqual(&cm_new->c1, &tmp);
+    b3 = vfAuth(cm_new, sigma_new, vk);
+    return b1 && b2 && b3;
+}

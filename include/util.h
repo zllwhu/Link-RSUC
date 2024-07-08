@@ -17,5 +17,7 @@ void authCom(commit_t cm, signature_t sigma, mclBnFr *v, sk_t sk, mclBnFr *r);
 int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r);
 int vfAuth(commit_t cm, signature_t sigma, vk_t vk);
 void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mclBnFr *r_);
+void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk_t sk);
+int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_t vk);
 
 #endif
