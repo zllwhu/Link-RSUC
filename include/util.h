@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+#define CLOCK_PRECISION 1E9
+
 extern const char G_STR[];
 extern const char P_STR[];
 extern const char G_HAT_STR[];
@@ -19,5 +21,6 @@ int vfAuth(commit_t cm, signature_t sigma, vk_t vk);
 void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mclBnFr *r_);
 void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk_t sk);
 int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_t vk);
+long long ttimer();
 
 #endif

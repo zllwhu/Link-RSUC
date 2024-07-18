@@ -178,3 +178,10 @@ int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_
     b3 = vfAuth(cm_new, sigma_new, vk);
     return b1 && b2 && b3;
 }
+
+long long ttimer()
+{
+    struct timespec time;
+    clock_gettime(CLOCK_REALTIME, &time);
+    return (long long)(time.tv_sec * CLOCK_PRECISION + time.tv_nsec);
+}
