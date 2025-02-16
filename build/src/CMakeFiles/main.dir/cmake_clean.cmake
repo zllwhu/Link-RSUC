@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/root/RSUC/bin/main"
-  "/root/RSUC/bin/main.pdb"
+  "/root/Link-RSUC/bin/main"
+  "/root/Link-RSUC/bin/main.pdb"
   "CMakeFiles/main.dir/main.c.o"
   "CMakeFiles/main.dir/main.c.o.d"
   "CMakeFiles/main.dir/util.c.o"

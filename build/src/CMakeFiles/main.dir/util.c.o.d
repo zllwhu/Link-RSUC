@@ -1,4 +1,4 @@
-src/CMakeFiles/main.dir/util.c.o: /root/RSUC/src/util.c \
+src/CMakeFiles/main.dir/util.c.o: /root/Link-RSUC/src/util.c \
  /usr/include/stdc-predef.h /usr/include/string.h \
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -91,5 +91,5 @@ src/CMakeFiles/main.dir/util.c.o: /root/RSUC/src/util.c \
  /usr/include/x86_64-linux-gnu/bits/ss_flags.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
  /usr/include/x86_64-linux-gnu/bits/sigthread.h \
- /usr/local/include/libtomcrypt/tomcrypt_pkcs.h /root/RSUC/include/util.h \
- /root/RSUC/include/types.h
+ /usr/local/include/libtomcrypt/tomcrypt_pkcs.h \
+ /root/Link-RSUC/include/util.h /root/Link-RSUC/include/types.h

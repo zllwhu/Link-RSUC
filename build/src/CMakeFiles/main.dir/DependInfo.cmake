@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/root/RSUC/src/main.c" "src/CMakeFiles/main.dir/main.c.o" "gcc" "src/CMakeFiles/main.dir/main.c.o.d"
-  "/root/RSUC/src/util.c" "src/CMakeFiles/main.dir/util.c.o" "gcc" "src/CMakeFiles/main.dir/util.c.o.d"
+  "/root/Link-RSUC/src/main.c" "src/CMakeFiles/main.dir/main.c.o" "gcc" "src/CMakeFiles/main.dir/main.c.o.d"
+  "/root/Link-RSUC/src/util.c" "src/CMakeFiles/main.dir/util.c.o" "gcc" "src/CMakeFiles/main.dir/util.c.o.d"
   )
 
 # Targets to which this target links.
