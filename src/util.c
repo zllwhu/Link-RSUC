@@ -1,3 +1,15 @@
+/**
+ * @file    util.c
+ * @brief   工具函数：定义Link-RSUC方案中的常量和函数
+ * @author  赵路路
+ * @date    2025-02-16
+ * @version 1.0
+ *
+ * 修改记录：
+ * - 2025-02-16 赵路路：创建工程，编译测试
+ * - 2025-02-17 赵路路：规范代码注释
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <mcl/bn_c256.h>
@@ -12,11 +24,21 @@ const char G_HAT_STR[] = "1 1085704699902305713594457076223282948137075635957851
 mclBnG1 G, P;
 mclBnG2 G_hat;
 
+/**
+ * @brief   测试用函数
+ * @param   params  无
+ * @return  无
+ */
 void util_function()
 {
     printf("Util function called.\n");
 }
 
+/**
+ * @brief   系统初始化函数
+ * @param   params  无
+ * @return  无
+ */
 void init_sys()
 {
     // 初始化mcl使用的曲线
@@ -27,6 +49,11 @@ void init_sys()
     mclBnG2_setStr(&G_hat, G_HAT_STR, strlen(G_HAT_STR), 10);
 }
 
+/**
+ * @brief   集线器密钥生成函数
+ * @param   params  私钥和公钥
+ * @return  无
+ */
 void keyGen(sk_t sk, vk_t vk)
 {
     // 选取私钥sk
@@ -37,6 +64,11 @@ void keyGen(sk_t sk, vk_t vk)
     mclBnG2_mul(&vk->x1_hat, &G_hat, &sk->x1);
 }
 
+/**
+ * @brief   认证承诺生成函数
+ * @param   params  承诺 签名 承诺值 集线器私钥 随机数
+ * @return  无
+ */
 void authCom(commit_t cm, signature_t sigma, mclBnFr *v, sk_t sk, mclBnFr *r)
 {
     mclBnG1 vg, rp;
@@ -69,6 +101,11 @@ void authCom(commit_t cm, signature_t sigma, mclBnFr *v, sk_t sk, mclBnFr *r)
     mclBnG1_mul(&sigma->t, &z3, &s_inv);
 }
 
+/**
+ * @brief   承诺验证函数
+ * @param   params  承诺 承诺值 随机数
+ * @return  验证结果
+ */
 int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r)
 {
     mclBnG1 rg, vg, rp, tmp;
@@ -82,6 +119,11 @@ int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r)
     return b1 && b2;
 }
 
+/**
+ * @brief   签名验证函数
+ * @param   params  承诺 签名 集线器公钥
+ * @return  验证结果
+ */
 int vfAuth(commit_t cm, signature_t sigma, vk_t vk)
 {
     if (mclBnG1_isZero(&sigma->s))
@@ -109,6 +151,11 @@ int vfAuth(commit_t cm, signature_t sigma, vk_t vk)
     return b1 && b2 && b3;
 }
 
+/**
+ * @brief   认证承诺随机化函数
+ * @param   params  原承诺 原签名 随机化承诺 随机化签名 随机数
+ * @return  无
+ */
 void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mclBnFr *r_)
 {
     mclBnG1 r_g, r_p, r_t, z_;
@@ -135,6 +182,11 @@ void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mcl
     mclBnG1_mul(&sigma_->t, &sigma->t, &s_inv_);
 }
 
+/**
+ * @brief   认证承诺更新函数
+ * @param   params  新承诺 新签名 原承诺 交易金额 集线器私钥
+ * @return  无
+ */
 void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk_t sk)
 {
     mclBnG1 ag, x0c0, x1c1, tmp, x0g, x1p;
@@ -163,6 +215,11 @@ void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk
     mclBnG1_mul(&sigma_new->t, &tmp, &s_new_inv);
 }
 
+/**
+ * @brief   认证承诺更新验证函数
+ * @param   params  原承诺 交易金额 新承诺 新签名 集线器公钥
+ * @return  验证结果
+ */
 int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_t vk)
 {
     if (mclBnG1_isZero(&sigma_new->s))
@@ -179,9 +236,14 @@ int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_
     return b1 && b2 && b3;
 }
 
-long long ttimer()
+/**
+ * @brief   计时器函数
+ * @param   params  无
+ * @return  64位高精度时间，单位为纳秒
+ */
+int64_t ttimer()
 {
     struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
-    return (long long)(time.tv_sec * CLOCK_PRECISION + time.tv_nsec);
+    return (int64_t)time.tv_sec * CLOCK_PRECISION + time.tv_nsec;
 }

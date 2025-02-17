@@ -1,3 +1,15 @@
+/**
+ * @file    main.c
+ * @brief   main函数：定义Link-RSUC方案中的执行流程
+ * @author  赵路路
+ * @date    2025-02-16
+ * @version 1.0
+ *
+ * 修改记录：
+ * - 2025-02-16 赵路路：创建工程，编译测试
+ * - 2025-02-17 赵路路：规范代码注释
+ */
+
 #include <stdio.h>
 #include "util.h"
 
@@ -15,6 +27,11 @@ mclBnFr V;
 mclBnFr AMT;
 mclBnFr RES;
 
+/**
+ * @brief   协议执行初始化函数
+ * @param   params  无
+ * @return  无
+ */
 void init_var()
 {
     // 初始化私钥sk
@@ -31,6 +48,11 @@ void init_var()
     signature_new(SIGMA_new);
 }
 
+/**
+ * @brief   main函数
+ * @param   params  无
+ * @return  执行结果
+ */
 int main()
 {
     long long start_time, stop_time, total_time;
