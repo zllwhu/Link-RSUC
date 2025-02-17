@@ -8,6 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释
+ * - 2025-02-17 赵路路：更新系统初始化函数、hash函数、认证承诺生成函数
  */
 
 #include <string.h>
@@ -35,11 +36,44 @@ void util_function()
 }
 
 /**
- * @brief   系统初始化函数
- * @param   params  无
+ * @brief   hash函数，将群元素哈希到大整数
+ * @param   params  哈希值 群元素 群元素个数
  * @return  无
  */
-void init_sys()
+void hashElementsToBigInt(mclBnFr *out, const mclBnG1 *points, int num) {
+    // sha256算法初始化
+    unsigned char hash[32];
+    hash_state md;
+    sha256_init(&md);
+
+    // 遍历所有群元素，进行序列化
+    for (int i = 0; i < num; i++) {
+        // G1群元素包含3个Fr，占用96字节
+        unsigned char buf[128];
+        size_t bufSize = mclBnG1_serialize(buf, sizeof(buf), &points[i]);
+        if (bufSize == 0) {
+            fprintf(stderr, "G1序列化失败\n");
+            exit(1);
+        }
+        sha256_process(&md, buf, bufSize);
+    }
+
+    // 计算最终的哈希值
+    sha256_done(&md, hash);
+
+    // 将哈希值转换为 mclBnFr（大整数）
+    if (mclBnFr_setBigEndianMod(out, hash, sizeof(hash)) != 0) {
+        fprintf(stderr, "哈希到大整数失败\n");
+        exit(1);
+    }
+}
+
+/**
+ * @brief   系统初始化函数
+ * @param   params  审计者私钥和公钥
+ * @return  无
+ */
+void init_sys(ask_t ask, apk_t apk)
 {
     // 初始化mcl使用的曲线
     mclBn_init(MCL_BN_SNARK1, MCLBN_COMPILED_TIME_VAR);
@@ -47,6 +81,11 @@ void init_sys()
     mclBnG1_setStr(&G, G_STR, strlen(G_STR), 10);
     mclBnG1_setStr(&P, P_STR, strlen(P_STR), 10);
     mclBnG2_setStr(&G_hat, G_HAT_STR, strlen(G_HAT_STR), 10);
+
+    // 选取审计者私钥ask
+    mclBnFr_setByCSPRNG(&ask->x);
+    // 计算审计者公钥apk
+    mclBnG1_mul(&apk->x, &G, &ask->x);
 }
 
 /**
@@ -66,39 +105,94 @@ void keyGen(sk_t sk, vk_t vk)
 
 /**
  * @brief   认证承诺生成函数
- * @param   params  承诺 签名 承诺值 集线器私钥 随机数
+ * @param   params  承诺 签名 链接密文和标签 承诺值 集线器私钥 审计者公钥 随机数r 随机数k 证明proof
  * @return  无
  */
-void authCom(commit_t cm, signature_t sigma, mclBnFr *v, sk_t sk, mclBnFr *r)
+void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, proof_t proof)
 {
-    mclBnG1 vg, rp;
-    mclBnFr s, s_inv;
-    mclBnG1 z, z1, z2, z3, t;
+    // 随机数
+    mclBnFr N, s, s_inv, rr, rk, rn;
+    // 承诺和密文中间量
+    mclBnG1 vg, rp, r0g, kapk;
+    // 签名中间量
+    mclBnG1 z, x0c0, x1c1, x0cp0, x1cp1, z1, z2, z3;
+    mclBnG1 t, u, x0g, x1p, x1apk, x1g;
+    // 证明中间量
+    mclBnFr rrg, rkapk, er, ek, en;
+
     // 随机选取r计算承诺cm
     mclBnFr_setByCSPRNG(r);
+    
     // 计算承诺cm
     mclBnG1_mul(&cm->c0, &G, r);
     mclBnG1_mul(&vg, &G, v);
     mclBnG1_mul(&rp, &P, r);
     mclBnG1_add(&cm->c1, &vg, &rp);
+
+    // 随机选取k, r0计算链接密文
+    mclBnFr_setByCSPRNG(k);
+    mclBnFr_setByCSPRNG(r0);
+    // 计算链接密文
+    mclBnG1_mul(&cp->cp0, &G, k);
+    mclBnG1_mul(&r0g, &G, r0);
+    mclBnG1_mul(&kapk, &apk->x, k);
+    mclBnG1_add(&cp->cp1, &r0g, &kapk);
+
+    // 随机选取N计算链接标签
+    mclBnFr_setByCSPRNG(&N);
+    // 计算链接标签
+    mclBnG1_mul(&cp->tag, &G, &N);
+
     // 随机选取s计算签名sigma
     mclBnFr_setByCSPRNG(&s);
     mclBnFr_inv(&s_inv, &s);
     // 计算签名sigma中的z
-    mclBnG1_mul(&z1, &cm->c0, &sk->x0);
-    mclBnG1_mul(&z2, &cm->c1, &sk->x1);
-    mclBnG1_add(&z3, &z1, &G);
-    mclBnG1_add(&z, &z3, &z2);
+    mclBnG1_mul(&x0c0, &cm->c0, &sk->x0);
+    mclBnG1_mul(&x1c1, &cm->c1, &sk->x1);
+    mclBnG1_mul(&x0cp0, &cp->cp0, &sk->x0);
+    mclBnG1_mul(&x1cp1, &cp->cp1, &sk->x1);
+    mclBnG1_add(&z1, &x0c0, &x1c1);
+    mclBnG1_add(&z2, &x0cp0, &x1cp1);
+    mclBnG1_add(&z3, &z1, &z2);
+    mclBnG1_add(&z, &z3, &G);
     mclBnG1_mul(&sigma->z, &z, &s_inv);
     // 计算签名sigma中的s
     mclBnG1_mul(&sigma->s, &G, &s);
     // 计算签名sigma中的s_hat
     mclBnG2_mul(&sigma->s_hat, &G_hat, &s);
     // 计算签名sigma中的t
-    mclBnG1_mul(&z1, &G, &sk->x0);
-    mclBnG1_mul(&z2, &P, &sk->x1);
-    mclBnG1_add(&z3, &z1, &z2);
-    mclBnG1_mul(&sigma->t, &z3, &s_inv);
+    mclBnG1_mul(&x0g, &G, &sk->x0);
+    mclBnG1_mul(&x1p, &P, &sk->x1);
+    mclBnG1_add(&t, &x0g, &x1p);
+    mclBnG1_mul(&sigma->t, &t, &s_inv);
+    // 计算签名sigma中的u
+    mclBnG1_mul(&x1apk, &apk->x, &sk->x1);
+    mclBnG1_add(&u, &x0g, &x1apk);
+    mclBnG1_mul(&sigma->u, &u, &s_inv);
+    // 计算签名sigma中的v
+    mclBnG1_mul(&x1g, &G, &sk->x1);
+    mclBnG1_mul(&sigma->v, &x1g, &s_inv);
+
+    // 随机选取rr, rk, rn计算证明
+    mclBnFr_setByCSPRNG(&rr);
+    mclBnFr_setByCSPRNG(&rk);
+    mclBnFr_setByCSPRNG(&rn);
+    // 计算a0, a1, a2
+    mclBnG1_mul(&proof->a0, &G, &rk);
+    mclBnG1_mul(&rrg, &G, &rr);
+    mclBnG1_mul(&rkapk, &apk->x, &rk);
+    mclBnG1_add(&proof->a1, &rrg, &rkapk);
+    mclBnG1_mul(&proof->a2, &G, &rn);
+    // 计算哈希值e
+    mclBnG1 points[7] = {cp->cp0, cp->cp1, cp->tag, proof->a0, proof->a1, proof->a2, apk->x};
+    hashElementsToBigInt(&proof->e, points, 7);
+    // 计算zr, zk, zn
+    mclBnFr_mul(&er, &proof->e, r0);
+    mclBnFr_mul(&ek, &proof->e, k);
+    mclBnFr_mul(&en, &proof->e, &N);
+    mclBnFr_add(&proof->zr, &rr, &er);
+    mclBnFr_add(&proof->zk, &rk, &ek);
+    mclBnFr_add(&proof->zn, &rn, &en);
 }
 
 /**
@@ -121,18 +215,35 @@ int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r)
 
 /**
  * @brief   签名验证函数
- * @param   params  承诺 签名 集线器公钥
+ * @param   params  承诺 链接密文和标签 签名 集线器公钥 审计者公钥 证明
  * @return  验证结果
  */
-int vfAuth(commit_t cm, signature_t sigma, vk_t vk)
+int vfAuth(commit_t cm, cp_t cp, signature_t sigma, vk_t vk, apk_t apk, proof_t proof)
 {
     if (mclBnG1_isZero(&sigma->s))
     {
         return 0;
     }
+    mclBnFr e;
+    mclBnG1 zkg, zrg, zkapk, zng, ecp1, ecp2, etag, t1, t2, t3, t4;
     mclBnGT zs_hat, gg_hat, c0x0_hat, c1x1_hat, gs_hat, sg_hat, ts_hat, gx0_hat, px1_hat;
     mclBnGT tmp1, tmp2;
-    int b1, b2, b3;
+    int e1, e2, e3, b1, b2, b3;
+
+    // 计算哈希值e
+    mclBnG1 points[7] = {cp->cp0, cp->cp1, cp->tag, proof->a0, proof->a1, proof->a2, apk->x};
+    hashElementsToBigInt(&e, points, 7);
+    // 验证等式1
+    mclBnG1_mul(&zkg, &G, &proof->zk);
+    mclBnG1_mul(&ecp1, &cp->cp1, &e);
+    mclBnG1_add(&t1, &proof->a0, &ecp1);
+    e1 = mclBnG1_isEqual(&zkg, &t1);
+    // 验证等式2
+    mclBnG1_mul(&zkg, &G, &proof->zk);
+    mclBnG1_mul(&ecp1, &cp->cp1, &e);
+    mclBnG1_add(&t1, &proof->a0, &ecp1);
+    // TODO
+
     mclBn_pairing(&zs_hat, &sigma->z, &sigma->s_hat);
     mclBn_pairing(&gg_hat, &G, &G_hat);
     mclBn_pairing(&c0x0_hat, &cm->c0, &vk->x0_hat);

@@ -8,6 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释
+ * - 2025-02-17 赵路路：更新系统初始化函数、hash函数、认证承诺生成函数
  */
 
 #ifndef UTIL_H
@@ -32,25 +33,32 @@ extern mclBnG2 G_hat;
 void util_function();
 
 /**
- * @brief   系统初始化函数
- * @param   params  无
+ * @brief   hash函数，将群元素哈希到大整数
+ * @param   params  哈希值 群元素 群元素个数
  * @return  无
  */
-void init_sys();
+void hashElementsToBigInt(mclBnFr *out, const mclBnG1 *points, int num);
+
+/**
+ * @brief   系统初始化函数
+ * @param   params  审计者私钥和公钥
+ * @return  无
+ */
+void init_sys(ask_t ask, apk_t apk);
 
 /**
  * @brief   集线器密钥生成函数
- * @param   params  私钥和公钥
+ * @param   params  集线器私钥和公钥
  * @return  无
  */
 void keyGen(sk_t sk, vk_t vk);
 
 /**
  * @brief   认证承诺生成函数
- * @param   params  承诺 签名 承诺值 集线器私钥 随机数
+ * @param   params  承诺 签名 链接密文和标签 承诺值 集线器私钥 审计者公钥 随机数r 随机数k 证明proof
  * @return  无
  */
-void authCom(commit_t cm, signature_t sigma, mclBnFr *v, sk_t sk, mclBnFr *r);
+void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, proof_t proof);
 
 /**
  * @brief   承诺验证函数
@@ -61,10 +69,10 @@ int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r);
 
 /**
  * @brief   签名验证函数
- * @param   params  承诺 签名 集线器公钥
+ * @param   params  承诺 链接密文和标签 签名 集线器公钥 审计者公钥 证明
  * @return  验证结果
  */
-int vfAuth(commit_t cm, signature_t sigma, vk_t vk);
+int vfAuth(commit_t cm, cp_t cp, signature_t sigma, vk_t vk, apk_t apk, proof_t proof);
 
 /**
  * @brief   认证承诺随机化函数
