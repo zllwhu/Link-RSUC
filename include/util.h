@@ -7,8 +7,7 @@
  *
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
- * - 2025-02-17 赵路路：规范代码注释
- * - 2025-02-17 赵路路：更新系统初始化函数、hash函数、认证承诺生成函数
+ * - 2025-02-17 赵路路：规范代码注释，修改系统初始化函数、认证承诺生成函数、承诺验证函数、签名验证函数，新增hash函数、证明验证函数
  */
 
 #ifndef UTIL_H
@@ -55,24 +54,30 @@ void keyGen(sk_t sk, vk_t vk);
 
 /**
  * @brief   认证承诺生成函数
- * @param   params  承诺 签名 链接密文和标签 承诺值 集线器私钥 审计者公钥 随机数r 随机数k 证明proof
+ * @param   params  承诺 签名 链接密文和标签 承诺值 集线器私钥 审计者公钥 随机数r 随机数k 随机数r0 随机数N
  * @return  无
  */
-void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, proof_t proof);
-
+void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N);
 /**
  * @brief   承诺验证函数
- * @param   params  承诺 承诺值 随机数
+ * @param   params  承诺 承诺值 随机数r 随机数k 随机数r0 随机数N
  * @return  验证结果
  */
-int vfCom(commit_t cm, mclBnFr *v, mclBnFr *r);
+int vfCom(commit_t cm, cp_t cp, mclBnFr *v, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N);
 
 /**
  * @brief   签名验证函数
- * @param   params  承诺 链接密文和标签 签名 集线器公钥 审计者公钥 证明
+ * @param   params  承诺 链接密文和标签 签名 集线器公钥 审计者公钥
  * @return  验证结果
  */
-int vfAuth(commit_t cm, cp_t cp, signature_t sigma, vk_t vk, apk_t apk, proof_t proof);
+int vfAuth(commit_t cm, cp_t cp, signature_t sigma, vk_t vk, apk_t apk);
+
+/**
+ * @brief   证明验证函数
+ * @param   params  证明 链接密文和标签 审计者公钥
+ * @return  验证结果
+ */
+int vfProof(proof_t proof, cp_t cp, apk_t apk);
 
 /**
  * @brief   认证承诺随机化函数
