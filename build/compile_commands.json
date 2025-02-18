@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/root/Link-RSUC/build/src",
+  "command": "/usr/bin/gcc  -I/usr/local/include/libtomcrypt -I/root/Link-RSUC/include -I/root/Link-RSUC/build/include -g -o CMakeFiles/LinkRSUC.dir/main.c.o -c /root/Link-RSUC/src/main.c",
+  "file": "/root/Link-RSUC/src/main.c"
+},
+{
+  "directory": "/root/Link-RSUC/build/src",
+  "command": "/usr/bin/gcc  -I/usr/local/include/libtomcrypt -I/root/Link-RSUC/include -I/root/Link-RSUC/build/include -g -o CMakeFiles/LinkRSUC.dir/util.c.o -c /root/Link-RSUC/src/util.c",
+  "file": "/root/Link-RSUC/src/util.c"
+}
+]
