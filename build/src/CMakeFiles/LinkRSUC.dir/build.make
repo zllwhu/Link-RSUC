@@ -73,29 +73,29 @@ src/CMakeFiles/LinkRSUC.dir/main.c.o: src/CMakeFiles/LinkRSUC.dir/flags.make
 src/CMakeFiles/LinkRSUC.dir/main.c.o: /root/Link-RSUC/src/main.c
 src/CMakeFiles/LinkRSUC.dir/main.c.o: src/CMakeFiles/LinkRSUC.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/root/Link-RSUC/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object src/CMakeFiles/LinkRSUC.dir/main.c.o"
-	cd /root/Link-RSUC/build/src && /usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT src/CMakeFiles/LinkRSUC.dir/main.c.o -MF CMakeFiles/LinkRSUC.dir/main.c.o.d -o CMakeFiles/LinkRSUC.dir/main.c.o -c /root/Link-RSUC/src/main.c
+	cd /root/Link-RSUC/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT src/CMakeFiles/LinkRSUC.dir/main.c.o -MF CMakeFiles/LinkRSUC.dir/main.c.o.d -o CMakeFiles/LinkRSUC.dir/main.c.o -c /root/Link-RSUC/src/main.c
 
 src/CMakeFiles/LinkRSUC.dir/main.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/LinkRSUC.dir/main.c.i"
-	cd /root/Link-RSUC/build/src && /usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /root/Link-RSUC/src/main.c > CMakeFiles/LinkRSUC.dir/main.c.i
+	cd /root/Link-RSUC/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /root/Link-RSUC/src/main.c > CMakeFiles/LinkRSUC.dir/main.c.i
 
 src/CMakeFiles/LinkRSUC.dir/main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/LinkRSUC.dir/main.c.s"
-	cd /root/Link-RSUC/build/src && /usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /root/Link-RSUC/src/main.c -o CMakeFiles/LinkRSUC.dir/main.c.s
+	cd /root/Link-RSUC/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /root/Link-RSUC/src/main.c -o CMakeFiles/LinkRSUC.dir/main.c.s
 
 src/CMakeFiles/LinkRSUC.dir/util.c.o: src/CMakeFiles/LinkRSUC.dir/flags.make
 src/CMakeFiles/LinkRSUC.dir/util.c.o: /root/Link-RSUC/src/util.c
 src/CMakeFiles/LinkRSUC.dir/util.c.o: src/CMakeFiles/LinkRSUC.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/root/Link-RSUC/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object src/CMakeFiles/LinkRSUC.dir/util.c.o"
-	cd /root/Link-RSUC/build/src && /usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT src/CMakeFiles/LinkRSUC.dir/util.c.o -MF CMakeFiles/LinkRSUC.dir/util.c.o.d -o CMakeFiles/LinkRSUC.dir/util.c.o -c /root/Link-RSUC/src/util.c
+	cd /root/Link-RSUC/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT src/CMakeFiles/LinkRSUC.dir/util.c.o -MF CMakeFiles/LinkRSUC.dir/util.c.o.d -o CMakeFiles/LinkRSUC.dir/util.c.o -c /root/Link-RSUC/src/util.c
 
 src/CMakeFiles/LinkRSUC.dir/util.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/LinkRSUC.dir/util.c.i"
-	cd /root/Link-RSUC/build/src && /usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /root/Link-RSUC/src/util.c > CMakeFiles/LinkRSUC.dir/util.c.i
+	cd /root/Link-RSUC/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /root/Link-RSUC/src/util.c > CMakeFiles/LinkRSUC.dir/util.c.i
 
 src/CMakeFiles/LinkRSUC.dir/util.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/LinkRSUC.dir/util.c.s"
-	cd /root/Link-RSUC/build/src && /usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /root/Link-RSUC/src/util.c -o CMakeFiles/LinkRSUC.dir/util.c.s
+	cd /root/Link-RSUC/build/src && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /root/Link-RSUC/src/util.c -o CMakeFiles/LinkRSUC.dir/util.c.s
 
 # Object files for target LinkRSUC
 LinkRSUC_OBJECTS = \
