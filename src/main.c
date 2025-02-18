@@ -8,6 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释，修改协议执行初始化函数、main函数
+ * - 2025-02-18 赵路路：修改main函数
  */
 
 #include <stdio.h>
@@ -27,11 +28,10 @@ signature_t SIGMA;
 signature_t SIGMA_;
 signature_t SIGMA_new;
 proof_t PROOF;
-mclBnFr R;
+mclBnFr R, R_;
 mclBnFr R0;
-mclBnFr K;
+mclBnFr K, K_;
 mclBnFr N;
-mclBnFr R_;
 mclBnFr V;
 mclBnFr AMT;
 mclBnFr RES;
@@ -77,7 +77,7 @@ int main()
     long long start_time, stop_time, total_time;
 
     // 本次运行变量初始化+系统初始化+密钥生成
-    printf("1. 本次运行变量初始化+系统初始化+密钥生成\n\n");
+    printf("1. 本次运行变量初始化+系统初始化+密钥生成\n");
     start_time = ttimer();
     init_var();
     init_sys(ASK, APK);
@@ -87,7 +87,7 @@ int main()
     printf("Init time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
 
     // 生成签名承诺
-    printf("2. 生成签名承诺\n\n");
+    printf("2. 生成签名承诺\n");
     start_time = ttimer();
     int v_int = 3;
     mclBnFr_setInt(&V, v_int);
@@ -99,71 +99,83 @@ int main()
     // 打开承诺
     printf("3. 打开承诺\n");
     start_time = ttimer();
-    int res = vfCom(CM, &V, &R);
-    printf("vfCom验证结果: %d\n\n", res);
+    int res = vfCom(CM, &V, CP, APK, &R, &K, &R0, &N);
     stop_time = ttimer();
     total_time = stop_time - start_time;
-    printf("VfCom time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
+    printf("VfCom time: %.5f sec\n", total_time / CLOCK_PRECISION);
+    printf("vfCom验证结果: %d\n\n", res);
 
     // 验证签名
     printf("4. 验证签名\n");
     start_time = ttimer();
     res = vfAuth(CM, CP, SIGMA, VK, APK);
-    printf("vfAuth验证结果: %d\n\n", res);
     stop_time = ttimer();
     total_time = stop_time - start_time;
-    printf("VfAuth time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
+    printf("VfAuth time: %.5f sec\n", total_time / CLOCK_PRECISION);
+    printf("vfAuth验证结果: %d\n\n", res);
 
-    // // 随机化签名承诺
-    // // printf("5. 随机化签名承诺\n\n");
-    // start_time = ttimer();
-    // rdmAC(CM_, SIGMA_, CM, SIGMA, &R_);
-    // stop_time = ttimer();
-    // total_time = stop_time - start_time;
-    // printf("RdmAC time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
+    // 随机化签名承诺
+    printf("5. 随机化签名承诺\n");
+    start_time = ttimer();
+    rdmAC(CM_, SIGMA_, CP_, PROOF, APK, CM, SIGMA, CP, &R_, &K_, &K, &R0, &N);
+    stop_time = ttimer();
+    total_time = stop_time - start_time;
+    printf("RdmAC time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
 
-    // // 打开随机化后的承诺
-    // // printf("6. 打开随机化后的承诺\n");
-    // mclBnFr rr;
-    // mclBnFr_add(&rr, &R, &R_);
-    // res = vfCom(CM_, &V, &rr);
-    // // printf("vfCom验证结果: %d\n\n", res);
+    // 打开随机化后的承诺
+    printf("6. 打开随机化后的承诺\n");
+    mclBnFr rr, kk, r0r, Nr;
+    mclBnFr_add(&rr, &R, &R_);
+    mclBnFr_add(&kk, &K, &K_);
+    mclBnFr_add(&r0r, &R0, &R_);
+    mclBnFr_add(&Nr, &N, &R_);
+    res = vfCom(CM_, &V, CP_, APK, &rr, &kk, &r0r, &Nr);
+    printf("vfCom验证结果: %d\n\n", res);
 
-    // // 验证随机化后的签名
-    // // printf("7. 验证随机化后的签名\n");
-    // res = vfAuth(CM_, SIGMA_, VK);
-    // // printf("vfAuth验证结果: %d\n\n", res);
+    // 验证随机化后的签名
+    printf("7. 验证随机化后的签名\n");
+    res = vfAuth(CM_, CP_, SIGMA_, VK, APK);
+    printf("vfAuth验证结果: %d\n\n", res);
 
-    // // 更新签名承诺
-    // // printf("8. 更新签名承诺\n\n");
-    // start_time = ttimer();
-    // int amt_int = 3;
-    // mclBnFr_setInt(&AMT, amt_int);
-    // updAC(CM_new, SIGMA_new, CM_, &AMT, SK);
-    // stop_time = ttimer();
-    // total_time = stop_time - start_time;
-    // printf("UpdAC time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
+    // 验证随机化后的证明
+    printf("8. 验证随机化后的证明\n");
+    start_time = ttimer();
+    res = vfProof(PROOF, CP_, APK);
+    stop_time = ttimer();
+    total_time = stop_time - start_time;
+    printf("vfProof time: %.5f sec\n", total_time / CLOCK_PRECISION);
+    printf("vfProof验证结果: %d\n\n", res);
 
-    // // 打开更新后的承诺
-    // // printf("9. 打开更新后的承诺\n");
-    // int res_int = v_int + amt_int;
-    // mclBnFr_setInt(&RES, res_int);
-    // res = vfCom(CM_new, &RES, &rr);
-    // // printf("vfCom验证结果: %d\n\n", res);
+    // 更新签名承诺
+    printf("9. 更新签名承诺\n");
+    start_time = ttimer();
+    int amt_int = 3;
+    mclBnFr_setInt(&AMT, amt_int);
+    updAC(CM_new, SIGMA_new, CM_, CP_, &AMT, SK, APK);
+    stop_time = ttimer();
+    total_time = stop_time - start_time;
+    printf("UpdAC time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
 
-    // // 验证更新后的签名
-    // // printf("10. 验证更新后的签名\n");
-    // res = vfAuth(CM_new, SIGMA_new, VK);
-    // // printf("vfAuth验证结果: %d\n\n", res);
+    // 打开更新后的承诺
+    printf("10. 打开更新后的承诺\n");
+    int res_int = v_int + amt_int;
+    mclBnFr_setInt(&RES, res_int);
+    res = vfCom(CM_new, &RES, CP_, APK, &rr, &kk, &r0r, &Nr);
+    printf("vfCom验证结果: %d\n\n", res);
 
-    // // 验证更新
-    // // printf("11. 验证更新\n");
-    // start_time = ttimer();
-    // res = vfUpd(CM_, &AMT, CM_new, SIGMA_new, VK);
-    // // printf("vfUpd验证结果: %d\n\n", res);
-    // stop_time = ttimer();
-    // total_time = stop_time - start_time;
-    // printf("VfUpd time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
+    // 验证更新后的签名
+    printf("11. 验证更新后的签名\n");
+    res = vfAuth(CM_new, CP_, SIGMA_new, VK, APK);
+    printf("vfAuth验证结果: %d\n\n", res);
+
+    // 验证更新
+    printf("12. 验证更新\n");
+    start_time = ttimer();
+    res = vfUpd(CM_, &AMT, CP_, CM_new, SIGMA_new, VK, APK);
+    stop_time = ttimer();
+    total_time = stop_time - start_time;
+    printf("VfUpd time: %.5f sec\n", total_time / CLOCK_PRECISION);
+    printf("vfUpd验证结果: %d\n\n", res);
 
     return 0;
 }

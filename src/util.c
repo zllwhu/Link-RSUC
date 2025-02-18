@@ -8,6 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释，修改系统初始化函数、认证承诺生成函数、承诺验证函数、签名验证函数，新增hash函数、证明验证函数
+ * - 2025-02-18 赵路路：修改承诺验证函数、认证承诺随机化函数、认证承诺更新函数、认证承诺更新验证函数
  */
 
 #include <string.h>
@@ -32,6 +33,18 @@ mclBnG2 G_hat;
 void util_function()
 {
     printf("Util function called.\n");
+}
+
+/**
+ * @brief   计时器函数
+ * @param   params  无
+ * @return  64位高精度时间，单位为纳秒
+ */
+int64_t ttimer()
+{
+    struct timespec time;
+    clock_gettime(CLOCK_REALTIME, &time);
+    return (int64_t)time.tv_sec * CLOCK_PRECISION + time.tv_nsec;
 }
 
 /**
@@ -60,7 +73,7 @@ void hashElementsToBigInt(mclBnFr *out, const mclBnG1 *points, int num) {
     // 计算最终的哈希值
     sha256_done(&md, hash);
 
-    // 将哈希值转换为 mclBnFr（大整数）
+    // 将哈希值转换为mclBnFr
     if (mclBnFr_setBigEndianMod(out, hash, sizeof(hash)) != 0) {
         fprintf(stderr, "哈希到大整数失败\n");
         exit(1);
@@ -117,23 +130,22 @@ void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t
     mclBnG1 z, x0c0, x1c1, x0cp0, x1cp1, z1, z2, z3;
     mclBnG1 t, u, x0g, x1p, x1apk, x1g;
 
-    // 随机选取k, r0计算链接密文
+    // 随机选取k, r0计算链接密文cp
     mclBnFr_setByCSPRNG(k);
     mclBnFr_setByCSPRNG(r0);
-    // 计算链接密文
+    // 计算链接密文cp
     mclBnG1_mul(&cp->cp0, &G, k);
     mclBnG1_mul(&r0g, &G, r0);
     mclBnG1_mul(&kapk, &apk->x, k);
     mclBnG1_add(&cp->cp1, &r0g, &kapk);
 
-    // 随机选取N计算链接标签
+    // 随机选取N计算链接标签tag
     mclBnFr_setByCSPRNG(N);
-    // 计算链接标签
+    // 计算链接标签tag
     mclBnG1_mul(&cp->tag, &G, N);
 
     // 随机选取r计算承诺cm
     mclBnFr_setByCSPRNG(r);
-    
     // 计算承诺cm
     mclBnG1_mul(&cm->c0, &G, r);
     mclBnG1_mul(&vg, &G, v);
@@ -173,13 +185,15 @@ void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t
 
 /**
  * @brief   承诺验证函数
- * @param   params  承诺 承诺值 随机数r 随机数k 随机数r0 随机数N
+ * @param   params  承诺 承诺值 链接密文和标签 审计者公钥 随机数r 随机数k 随机数r0 随机数N
  * @return  验证结果
  */
-int vfCom(commit_t cm, cp_t cp, mclBnFr *v, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N)
+int vfCom(commit_t cm, mclBnFr *v, cp_t cp, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N)
 {
-    mclBnG1 tmp, rg, vg, rp;
+    mclBnG1 tmp, rg, vg, rp, kg, r0g, kapk, ng;
     int b1, b2, b3, b4, b5;
+
+    // 验证承诺cm正确计算
     mclBnG1_mul(&rg, &G, r);
     b1 = mclBnG1_isEqual(&cm->c0, &rg);
     mclBnG1_mul(&vg, &G, v);
@@ -187,9 +201,18 @@ int vfCom(commit_t cm, cp_t cp, mclBnFr *v, mclBnFr *r, mclBnFr *k, mclBnFr *r0,
     mclBnG1_add(&tmp, &vg, &rp);
     b2 = mclBnG1_isEqual(&cm->c1, &tmp);
 
-    // TODO: 还需要验证链接密文和标签计算正确
+    // 验证链接密文cp正确计算
+    mclBnG1_mul(&kg, &G, k);
+    b3 = mclBnG1_isEqual(&cp->cp0, &kg);
+    mclBnG1_mul(&r0g, &G, r0);
+    mclBnG1_mul(&kapk, &apk->x, k);
+    mclBnG1_add(&tmp, &r0g, &kapk);
+    b4 = mclBnG1_isEqual(&cp->cp1, &tmp);
+    mclBnG1_mul(&ng, &G, N);
 
-    return b1 && b2;
+    // 验证链接标签tag正确计算
+    b5 = mclBnG1_isEqual(&cp->tag, &ng);
+    return b1 && b2 && b3 && b4 && b5;
 }
 
 /**
@@ -219,21 +242,26 @@ int vfAuth(commit_t cm, cp_t cp, signature_t sigma, vk_t vk, apk_t apk)
     mclBnGT_mul(&tmp, &tmp, &c0x0_hat);
     mclBnGT_mul(&tmp, &tmp, &c1x1_hat);
     b1 = mclBnGT_isEqual(&zs_hat, &tmp);
+
     mclBn_pairing(&gs_hat, &G, &sigma->s_hat);
     mclBn_pairing(&sg_hat, &sigma->s, &G_hat);
     b2 = mclBnGT_isEqual(&gs_hat, &sg_hat);
+
     mclBn_pairing(&ts_hat, &sigma->t, &sigma->s_hat);
     mclBn_pairing(&gx0_hat, &G, &vk->x0_hat);
     mclBn_pairing(&px1_hat, &P, &vk->x1_hat);
     mclBnGT_mul(&tmp, &gx0_hat, &px1_hat);
     b3 = mclBnGT_isEqual(&ts_hat, &tmp);
+
     mclBn_pairing(&us_hat, &sigma->u, &sigma->s_hat);
     mclBn_pairing(&apkx1_hat, &apk->x, &vk->x1_hat);
     mclBnGT_mul(&tmp, &gx0_hat, &apkx1_hat);
     b4 = mclBnGT_isEqual(&us_hat, &tmp);
+
     mclBn_pairing(&vs_hat, &sigma->v, &sigma->s_hat);
     mclBn_pairing(&gx1_hat, &G, &vk->x1_hat);
     b5 = mclBnGT_isEqual(&vs_hat, &gx1_hat);
+
     return b1 && b2 && b3 && b4 && b5;
 }
 
@@ -258,7 +286,8 @@ int vfProof(proof_t proof, cp_t cp, apk_t apk) {
     mclBnG1_mul(&zng, &G, &proof->zn);
     mclBnG1_mul(&etag, &cp->tag, &proof->e);
     mclBnG1_sub(&a2, &zng, &etag);
-    // 计算哈希值
+
+    // 计算哈希值e'并比较
     mclBnG1 points[7] = {cp->cp0, cp->cp1, cp->tag, a0, a1, a2, apk->x};
     hashElementsToBigInt(&e, points, 7);
     return mclBnFr_isEqual(&e, &proof->e);
@@ -266,46 +295,101 @@ int vfProof(proof_t proof, cp_t cp, apk_t apk) {
 
 /**
  * @brief   认证承诺随机化函数
- * @param   params  原承诺 原签名 随机化承诺 随机化签名 随机数
+ * @param   params  随机化承诺 随机化签名 随机化链接密文和标签 证明 审计者公钥 原承诺 原签名 原链接密文和标签 随机数r' 随机数k' 随机数k 随机数r0 随机数N
  * @return  无
  */
-void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mclBnFr *r_)
+void rdmAC(commit_t cm_, signature_t sigma_, cp_t cp_, proof_t proof, apk_t apk, commit_t cm, signature_t sigma, cp_t cp, mclBnFr *r_, mclBnFr *k_, mclBnFr *k, mclBnFr *r0, mclBnFr *N)
 {
-    mclBnG1 r_g, r_p, r_t, z_;
-    mclBnFr s_, s_inv_;
+    // 随机数
+    mclBnFr s, s_inv, rr, rk, rn;
+    // 承诺和密文中间量
+    mclBnG1 tmp, k_g, r_g, k_apk, r_p;
+    // 签名中间量
+    mclBnG1 z1, z2, z3, r_t, k_u, r_v;
+    // 证明中间量
+    mclBnG1 a0, a1, a2, rrg, rkapk;
+    mclBnFr r0r_, kk_, Nr_, er0r_, ekk_, eNr_;
 
-    // 随机选取r_计算承诺cm_
+    // 随机选取k', r'计算随机化链接密文cp'
+    mclBnFr_setByCSPRNG(k_);
     mclBnFr_setByCSPRNG(r_);
-    // 计算承诺cm_
+    // 计算随机化链接密文cp'
+    mclBnG1_mul(&k_g, &G, k_);
+    mclBnG1_add(&cp_->cp0, &cp->cp0, &k_g);
     mclBnG1_mul(&r_g, &G, r_);
+    mclBnG1_mul(&k_apk, &apk->x, k_);
+    mclBnG1_add(&tmp, &r_g, &k_apk);
+    mclBnG1_add(&cp_->cp1, &cp->cp1, &tmp);
+    
+    // 计算随机化链接标签tag'
+    mclBnG1_add(&cp_->tag, &cp->tag, &r_g);
+
+    // 计算随机化承诺cm'
     mclBnG1_add(&cm_->c0, &cm->c0, &r_g);
     mclBnG1_mul(&r_p, &P, r_);
     mclBnG1_add(&cm_->c1, &cm->c1, &r_p);
 
-    // 随机选取s_计算签名sigma_
-    mclBnFr_setByCSPRNG(&s_);
-    mclBnFr_inv(&s_inv_, &s_);
-    // 计算签名sigma_中的z
+    // 随机选取s'计算随机化签名sigma'
+    mclBnFr_setByCSPRNG(&s);
+    mclBnFr_inv(&s_inv, &s);
+    // 计算签名sigma'中的z'
     mclBnG1_mul(&r_t, &sigma->t, r_);
-    mclBnG1_add(&z_, &sigma->z, &r_t);
-    mclBnG1_mul(&sigma_->z, &z_, &s_inv_);
-    // 计算签名sigma_中的s
-    mclBnG1_mul(&sigma_->s, &sigma->s, &s_);
-    // 计算签名sigma_中的s_hat
-    mclBnG2_mul(&sigma_->s_hat, &sigma->s_hat, &s_);
-    // 计算签名sigma_中的t
-    mclBnG1_mul(&sigma_->t, &sigma->t, &s_inv_);
+    mclBnG1_mul(&k_u, &sigma->u, k_);
+    mclBnG1_mul(&r_v, &sigma->v, r_);
+    mclBnG1_add(&z1, &sigma->z, &r_t);
+    mclBnG1_add(&z2, &z1, &k_u);
+    mclBnG1_add(&z3, &z2, &r_v);
+    mclBnG1_mul(&sigma_->z, &z3, &s_inv);
+    // 计算签名sigma'中的s'
+    mclBnG1_mul(&sigma_->s, &sigma->s, &s);
+    // 计算签名sigma'中的s'_hat
+    mclBnG2_mul(&sigma_->s_hat, &sigma->s_hat, &s);
+    // 计算签名sigma'中的t'
+    mclBnG1_mul(&sigma_->t, &sigma->t, &s_inv);
+    // 计算签名sigma'中的u'
+    mclBnG1_mul(&sigma_->u, &sigma->u, &s_inv);
+    // 计算签名sigma'中的v'
+    mclBnG1_mul(&sigma_->v, &sigma->v, &s_inv);
+
+    // 随机选取rr, rk, rn计算证明proof
+    mclBnFr_setByCSPRNG(&rr);
+    mclBnFr_setByCSPRNG(&rk);
+    mclBnFr_setByCSPRNG(&rn);
+    // 计算a0, a1, a2
+    mclBnG1_mul(&a0, &G, &rk);
+    mclBnG1_mul(&rrg, &G, &rr);
+    mclBnG1_mul(&rkapk, &apk->x, &rk);
+    mclBnG1_add(&a1, &rrg, &rkapk);
+    mclBnG1_mul(&a2, &G, &rn);
+    // 计算哈希值
+    mclBnG1 points[7] = {cp_->cp0, cp_->cp1, cp_->tag, a0, a1, a2, apk->x};
+    hashElementsToBigInt(&proof->e, points, 7);
+    // 计算zr, zk, zn
+    mclBnFr_add(&r0r_, r0, r_);
+    mclBnFr_mul(&er0r_, &proof->e, &r0r_);
+    mclBnFr_add(&proof->zr, &rr, &er0r_);
+    mclBnFr_add(&kk_, k, k_);
+    mclBnFr_mul(&ekk_, &proof->e, &kk_);
+    mclBnFr_add(&proof->zk, &rk, &ekk_);
+    mclBnFr_add(&Nr_, N, r_);
+    mclBnFr_mul(&eNr_, &proof->e, &Nr_);
+    mclBnFr_add(&proof->zn, &rn, &eNr_);
 }
 
 /**
  * @brief   认证承诺更新函数
- * @param   params  新承诺 新签名 原承诺 交易金额 集线器私钥
+ * @param   params  新承诺 新签名 原承诺 链接密文和标签 交易金额 集线器私钥 审计者公钥
  * @return  无
  */
-void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk_t sk)
+void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, cp_t cp, mclBnFr *amt, sk_t sk, apk_t apk)
 {
-    mclBnG1 tmp, ag, x0c0, x1c1, x0g, x1p;
+    // 随机数
     mclBnFr s_new, s_new_inv;
+    // 承诺中间量
+    mclBnG1 tmp, ag;
+    // 签名中间量
+    mclBnG1 z, x0c0, x1c1, x0cp0, x1cp1, z1, z2, z3;
+    mclBnG1 t, u, x0g, x1p, x1apk, x1g;
 
     // 计算承诺cm_new
     cm_new->c0 = cm->c0;
@@ -316,11 +400,15 @@ void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk
     mclBnFr_setByCSPRNG(&s_new);
     mclBnFr_inv(&s_new_inv, &s_new);
     // 计算签名sigma_new中的z
-    mclBnG1_mul(&x0c0, &cm->c0, &sk->x0);
+    mclBnG1_mul(&x0c0, &cm_new->c0, &sk->x0);
     mclBnG1_mul(&x1c1, &cm_new->c1, &sk->x1);
-    mclBnG1_add(&tmp, &x0c0, &x1c1);
-    mclBnG1_add(&tmp, &tmp, &G);
-    mclBnG1_mul(&sigma_new->z, &tmp, &s_new_inv);
+    mclBnG1_mul(&x0cp0, &cp->cp0, &sk->x0);
+    mclBnG1_mul(&x1cp1, &cp->cp1, &sk->x1);
+    mclBnG1_add(&z1, &x0c0, &x1c1);
+    mclBnG1_add(&z2, &x0cp0, &x1cp1);
+    mclBnG1_add(&z3, &z1, &z2);
+    mclBnG1_add(&z, &z3, &G);
+    mclBnG1_mul(&sigma_new->z, &z, &s_new_inv);
     // 计算签名sigma_new中的s
     mclBnG1_mul(&sigma_new->s, &G, &s_new);
     // 计算签名sigma_new中的s_hat
@@ -328,16 +416,23 @@ void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk
     // 计算签名sigma_new中的t
     mclBnG1_mul(&x0g, &G, &sk->x0);
     mclBnG1_mul(&x1p, &P, &sk->x1);
-    mclBnG1_add(&tmp, &x0g, &x1p);
-    mclBnG1_mul(&sigma_new->t, &tmp, &s_new_inv);
+    mclBnG1_add(&t, &x0g, &x1p);
+    mclBnG1_mul(&sigma_new->t, &t, &s_new_inv);
+    // 计算签名sigma中的u
+    mclBnG1_mul(&x1apk, &apk->x, &sk->x1);
+    mclBnG1_add(&u, &x0g, &x1apk);
+    mclBnG1_mul(&sigma_new->u, &u, &s_new_inv);
+    // 计算签名sigma中的v
+    mclBnG1_mul(&x1g, &G, &sk->x1);
+    mclBnG1_mul(&sigma_new->v, &x1g, &s_new_inv);
 }
 
 /**
  * @brief   认证承诺更新验证函数
- * @param   params  原承诺 交易金额 新承诺 新签名 集线器公钥
+ * @param   params  原承诺 交易金额 链接密文和标签 新承诺 新签名 集线器公钥 审计者公钥
  * @return  验证结果
  */
-int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_t vk)
+int vfUpd(commit_t cm, mclBnFr *amt, cp_t cp, commit_t cm_new, signature_t sigma_new, vk_t vk, apk_t apk)
 {
     if (mclBnG1_isZero(&sigma_new->s))
     {
@@ -351,18 +446,6 @@ int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_
     mclBnG1_mul(&ag, &G, amt);
     mclBnG1_add(&tmp, &ag, &cm->c1);
     b2 = mclBnG1_isEqual(&cm_new->c1, &tmp);
-    // b3 = vfAuth(cm_new, sigma_new, vk);
+    b3 = vfAuth(cm_new, cp, sigma_new, vk, apk);
     return b1 && b2 && b3;
-}
-
-/**
- * @brief   计时器函数
- * @param   params  无
- * @return  64位高精度时间，单位为纳秒
- */
-int64_t ttimer()
-{
-    struct timespec time;
-    clock_gettime(CLOCK_REALTIME, &time);
-    return (int64_t)time.tv_sec * CLOCK_PRECISION + time.tv_nsec;
 }

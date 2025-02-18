@@ -1,1 +1,1 @@
-/usr/bin/gcc CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/util.c.o -o /root/Link-RSUC/bin/main   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib /usr/local/lib/libtomcrypt.a -lmclbn256 -lmcl /usr/local/lib/libsecp256k1.so 
+/usr/bin/gcc -g CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/util.c.o -o /root/Link-RSUC/bin/main   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib /usr/local/lib/libtomcrypt.a -lmclbn256 -lmcl /usr/local/lib/libsecp256k1.so 

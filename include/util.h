@@ -8,6 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释，修改系统初始化函数、认证承诺生成函数、承诺验证函数、签名验证函数，新增hash函数、证明验证函数
+ * - 2025-02-18 赵路路：修改承诺验证函数、认证承诺随机化函数、认证承诺更新函数、认证承诺更新验证函数
  */
 
 #ifndef UTIL_H
@@ -30,6 +31,13 @@ extern mclBnG2 G_hat;
  * @return  无
  */
 void util_function();
+
+/**
+ * @brief   计时器函数
+ * @param   params  无
+ * @return  64位高精度时间，单位为纳秒
+ */
+int64_t ttimer();
 
 /**
  * @brief   hash函数，将群元素哈希到大整数
@@ -60,10 +68,10 @@ void keyGen(sk_t sk, vk_t vk);
 void authCom(commit_t cm, signature_t sigma, cp_t cp, mclBnFr *v, sk_t sk, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N);
 /**
  * @brief   承诺验证函数
- * @param   params  承诺 承诺值 随机数r 随机数k 随机数r0 随机数N
+ * @param   params  承诺 承诺值 链接密文和标签 审计者公钥 随机数r 随机数k 随机数r0 随机数N
  * @return  验证结果
  */
-int vfCom(commit_t cm, cp_t cp, mclBnFr *v, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N);
+int vfCom(commit_t cm, mclBnFr *v, cp_t cp, apk_t apk, mclBnFr *r, mclBnFr *k, mclBnFr *r0, mclBnFr *N);
 
 /**
  * @brief   签名验证函数
@@ -81,30 +89,23 @@ int vfProof(proof_t proof, cp_t cp, apk_t apk);
 
 /**
  * @brief   认证承诺随机化函数
- * @param   params  原承诺 原签名 随机化承诺 随机化签名 随机数
+ * @param   params  随机化承诺 随机化签名 随机化链接密文和标签 证明 审计者公钥 原承诺 原签名 原链接密文和标签 随机数r' 随机数k' 随机数k 随机数r0 随机数N
  * @return  无
  */
-void rdmAC(commit_t cm_, signature_t sigma_, commit_t cm, signature_t sigma, mclBnFr *r_);
+void rdmAC(commit_t cm_, signature_t sigma_, cp_t cp_, proof_t proof, apk_t apk, commit_t cm, signature_t sigma, cp_t cp, mclBnFr *r_, mclBnFr *k_, mclBnFr *k, mclBnFr *r0, mclBnFr *N);
 
 /**
  * @brief   认证承诺更新函数
- * @param   params  新承诺 新签名 原承诺 交易金额 集线器私钥
+ * @param   params  新承诺 新签名 原承诺 链接密文和标签 交易金额 集线器私钥 审计者公钥
  * @return  无
  */
-void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, mclBnFr *amt, sk_t sk);
+void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, cp_t cp, mclBnFr *amt, sk_t sk, apk_t apk);
 
 /**
  * @brief   认证承诺更新验证函数
- * @param   params  原承诺 交易金额 新承诺 新签名 集线器公钥
+ * @param   params  原承诺 交易金额 链接密文和标签 新承诺 新签名 集线器公钥 审计者公钥
  * @return  验证结果
  */
-int vfUpd(commit_t cm, mclBnFr *amt, commit_t cm_new, signature_t sigma_new, vk_t vk);
-
-/**
- * @brief   计时器函数
- * @param   params  无
- * @return  64位高精度时间，单位为纳秒
- */
-int64_t ttimer();
+int vfUpd(commit_t cm, mclBnFr *amt, cp_t cp, commit_t cm_new, signature_t sigma_new, vk_t vk, apk_t apk);
 
 #endif
