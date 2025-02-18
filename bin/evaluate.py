@@ -12,6 +12,7 @@ rdmAC = np.zeros(runTimes)
 vfProof = np.zeros(runTimes)
 updAC = np.zeros(runTimes)
 vfUpd = np.zeros(runTimes)
+linkCP = np.zeros(runTimes)
 
 for i in range(runTimes):
     res = subprocess.check_output('./LinkRSUC', shell=True)
@@ -27,6 +28,7 @@ for i in range(runTimes):
     vfProof_time = eval(res_split[12][-11:-4])
     updAC_time = eval(res_split[14][-11:-4])
     vfUpd_time = eval(res_split[16][-11:-4])
+    linkCP_time = eval(res_split[18][-11:-4])
 
     setup[i] = setup_time
     keyGen[i] = keyGen_time
@@ -37,6 +39,7 @@ for i in range(runTimes):
     vfProof[i] = vfProof_time
     updAC[i] = updAC_time
     vfUpd[i] = vfUpd_time
+    linkCP[i] = linkCP_time
 
 print("Setup time AVG: {:.5f} sec".format(np.mean(setup)))
 print("KeyGen time AVG: {:.5f} sec".format(np.mean(keyGen)))
@@ -47,3 +50,4 @@ print("RdmAC time AVG: {:.5f} sec".format(np.mean(rdmAC)))
 print("VfProof time AVG: {:.5f} sec".format(np.mean(vfProof)))
 print("UpdAC time AVG: {:.5f} sec".format(np.mean(updAC)))
 print("VfUpd time AVG: {:.5f} sec".format(np.mean(vfUpd)))
+print("LinkCP time AVG: {:.5f} sec".format(np.mean(linkCP)))

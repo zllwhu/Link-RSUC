@@ -8,7 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释，修改系统初始化函数、认证承诺生成函数、承诺验证函数、签名验证函数，新增hash函数、证明验证函数
- * - 2025-02-18 赵路路：修改承诺验证函数、认证承诺随机化函数、认证承诺更新函数、认证承诺更新验证函数
+ * - 2025-02-18 赵路路：修改承诺验证函数、认证承诺随机化函数、认证承诺更新函数、认证承诺更新验证函数，新增链接交易函数
  */
 
 #ifndef UTIL_H
@@ -107,5 +107,12 @@ void updAC(commit_t cm_new, signature_t sigma_new, commit_t cm, cp_t cp, mclBnFr
  * @return  验证结果
  */
 int vfUpd(commit_t cm, mclBnFr *amt, cp_t cp, commit_t cm_new, signature_t sigma_new, vk_t vk, apk_t apk);
+
+/**
+ * @brief   链接交易函数
+ * @param   params  链接密文和标签1 链接密文和标签2 证明 审计者私钥 审计者公钥
+ * @return  验证结果
+ */
+int linkCP(cp_t cp1, cp_t cp2, proof_t proof, ask_t ask, apk_t apk);
 
 #endif

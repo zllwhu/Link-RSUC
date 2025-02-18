@@ -184,5 +184,14 @@ int main()
     printf("VfUpd time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
     // printf("vfUpd验证结果: %d\n\n", res);
 
+    // 验证交易链接
+    // printf("14. 验证交易链接\n");
+    start_time = ttimer();
+    res = linkCP(CP, CP_, PROOF, ASK, APK);
+    stop_time = ttimer();
+    total_time = stop_time - start_time;
+    printf("LinkCP time: %.5f sec\n\n", total_time / CLOCK_PRECISION);
+    // printf("LinkCP验证结果: %d\n\n", res);
+
     return 0;
 }

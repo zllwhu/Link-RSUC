@@ -8,7 +8,7 @@
  * 修改记录：
  * - 2025-02-16 赵路路：创建工程，编译测试
  * - 2025-02-17 赵路路：规范代码注释，修改系统初始化函数、认证承诺生成函数、承诺验证函数、签名验证函数，新增hash函数、证明验证函数
- * - 2025-02-18 赵路路：修改承诺验证函数、认证承诺随机化函数、认证承诺更新函数、认证承诺更新验证函数
+ * - 2025-02-18 赵路路：修改承诺验证函数、认证承诺随机化函数、认证承诺更新函数、认证承诺更新验证函数，新增链接交易函数
  */
 
 #include <string.h>
@@ -448,4 +448,30 @@ int vfUpd(commit_t cm, mclBnFr *amt, cp_t cp, commit_t cm_new, signature_t sigma
     b2 = mclBnG1_isEqual(&cm_new->c1, &tmp);
     b3 = vfAuth(cm_new, cp, sigma_new, vk, apk);
     return b1 && b2 && b3;
+}
+
+/**
+ * @brief   链接交易函数
+ * @param   params  链接密文和标签1 链接密文和标签2 证明 审计者私钥 审计者公钥
+ * @return  验证结果
+ */
+int linkCP(cp_t cp1, cp_t cp2, proof_t proof, ask_t ask, apk_t apk) {
+    mclBnG1 cp10ask, cp20ask, ep1, ep2, left, right;
+    int b1, b2;
+
+    // 验证证明
+    b1 = vfProof(proof, cp2, apk);
+
+    // 解密链接密文
+    mclBnG1_mul(&cp10ask, &cp1->cp0, &ask->x);
+    mclBnG1_sub(&ep1, &cp1->cp1, &cp10ask);
+    mclBnG1_mul(&cp20ask, &cp2->cp0, &ask->x);
+    mclBnG1_sub(&ep2, &cp2->cp1, &cp20ask);
+
+    // 验证交易链接
+    mclBnG1_sub(&left, &ep2, &ep1);
+    mclBnG1_sub(&right, &cp2->tag, &cp1->tag);
+    b2 = mclBnG1_isEqual(&left, &right);
+
+    return b1 && b2;
 }
