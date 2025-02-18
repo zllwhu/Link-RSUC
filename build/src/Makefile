@@ -117,25 +117,25 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-src/CMakeFiles/main.dir/rule:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/main.dir/rule
-.PHONY : src/CMakeFiles/main.dir/rule
+src/CMakeFiles/LinkRSUC.dir/rule:
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/LinkRSUC.dir/rule
+.PHONY : src/CMakeFiles/LinkRSUC.dir/rule
 
 # Convenience name for target.
-main: src/CMakeFiles/main.dir/rule
-.PHONY : main
+LinkRSUC: src/CMakeFiles/LinkRSUC.dir/rule
+.PHONY : LinkRSUC
 
 # fast build rule for target.
-main/fast:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/build
-.PHONY : main/fast
+LinkRSUC/fast:
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/build
+.PHONY : LinkRSUC/fast
 
 main.o: main.c.o
 .PHONY : main.o
 
 # target to build an object file
 main.c.o:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/main.c.o
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/main.c.o
 .PHONY : main.c.o
 
 main.i: main.c.i
@@ -143,7 +143,7 @@ main.i: main.c.i
 
 # target to preprocess a source file
 main.c.i:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/main.c.i
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/main.c.i
 .PHONY : main.c.i
 
 main.s: main.c.s
@@ -151,7 +151,7 @@ main.s: main.c.s
 
 # target to generate assembly for a file
 main.c.s:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/main.c.s
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/main.c.s
 .PHONY : main.c.s
 
 util.o: util.c.o
@@ -159,7 +159,7 @@ util.o: util.c.o
 
 # target to build an object file
 util.c.o:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/util.c.o
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/util.c.o
 .PHONY : util.c.o
 
 util.i: util.c.i
@@ -167,7 +167,7 @@ util.i: util.c.i
 
 # target to preprocess a source file
 util.c.i:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/util.c.i
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/util.c.i
 .PHONY : util.c.i
 
 util.s: util.c.s
@@ -175,7 +175,7 @@ util.s: util.c.s
 
 # target to generate assembly for a file
 util.c.s:
-	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/main.dir/build.make src/CMakeFiles/main.dir/util.c.s
+	cd /root/Link-RSUC/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/LinkRSUC.dir/build.make src/CMakeFiles/LinkRSUC.dir/util.c.s
 .PHONY : util.c.s
 
 # Help Target
@@ -186,7 +186,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... main"
+	@echo "... LinkRSUC"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

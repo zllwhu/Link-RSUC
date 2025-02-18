@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/root/Link-RSUC/bin/main"
+			"path" : "/root/Link-RSUC/bin/LinkRSUC"
 		}
 	],
 	"backtrace" : 1,
@@ -50,12 +50,6 @@
 	"compileGroups" : 
 	[
 		{
-			"compileCommandFragments" : 
-			[
-				{
-					"fragment" : "-g"
-				}
-			],
 			"includes" : 
 			[
 				{
@@ -87,15 +81,11 @@
 			]
 		}
 	],
-	"id" : "main::@145eef247bfb46b6828c",
+	"id" : "LinkRSUC::@145eef247bfb46b6828c",
 	"link" : 
 	{
 		"commandFragments" : 
 		[
-			{
-				"fragment" : "-g",
-				"role" : "flags"
-			},
 			{
 				"fragment" : "",
 				"role" : "flags"
@@ -129,8 +119,8 @@
 		],
 		"language" : "C"
 	},
-	"name" : "main",
-	"nameOnDisk" : "main",
+	"name" : "LinkRSUC",
+	"nameOnDisk" : "LinkRSUC",
 	"paths" : 
 	{
 		"build" : "src",
