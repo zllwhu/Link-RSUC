@@ -50,7 +50,7 @@ for i in range(runTimes):
     vfUpdL[i] = vfUpd_timeL
     linkCPL[i] = linkCP_timeL
 
-    res = subprocess.check_output('./main', shell=True)
+    res = subprocess.check_output('./RSUCEXP1', shell=True)
     res = res.decode('utf-8')
     res_split = res.splitlines()
 
