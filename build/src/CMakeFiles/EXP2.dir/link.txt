@@ -1,1 +1,1 @@
-/usr/bin/gcc CMakeFiles/EXP2.dir/exp2.c.o CMakeFiles/EXP2.dir/util.c.o -o /root/Link-RSUC/bin/EXP2   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib /usr/local/lib/libtomcrypt.a -lmclbn256 -lmcl /usr/local/lib/libsecp256k1.so 
+/usr/bin/gcc -g CMakeFiles/EXP2.dir/exp2.c.o CMakeFiles/EXP2.dir/util.c.o -o /root/Link-RSUC/bin/EXP2   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib /usr/local/lib/libtomcrypt.a -lmclbn256 -lmcl /usr/local/lib/libsecp256k1.so 
