@@ -4,6 +4,10 @@
         "util.h": "c",
         "tomcrypt.h": "c",
         "tomcrypt_hash.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "secp256k1.h": "c",
+        "stdio.h": "c",
+        "bn_c256.h": "c",
+        "bn.h": "c"
     }
 }

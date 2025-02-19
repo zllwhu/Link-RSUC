@@ -24,7 +24,7 @@ updAC = np.zeros(runTimes)
 vfUpd = np.zeros(runTimes)
 
 for i in range(runTimes):
-    resL = subprocess.check_output('./LinkRSUC', shell=True)
+    resL = subprocess.check_output('./EXP1', shell=True)
     resL = resL.decode('utf-8')
     resL_split = resL.splitlines()
 

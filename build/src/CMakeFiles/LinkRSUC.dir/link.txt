@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/LinkRSUC.dir/main.c.o CMakeFiles/LinkRSUC.dir/util.c.o -o /root/Link-RSUC/bin/LinkRSUC   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib /usr/local/lib/libtomcrypt.a -lmclbn256 -lmcl /usr/local/lib/libsecp256k1.so 
