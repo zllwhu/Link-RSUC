@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/root/Link-RSUC/bin/EXP1"
-  "/root/Link-RSUC/bin/EXP1.pdb"
+  "../../bin/EXP1"
+  "../../bin/EXP1.pdb"
   "CMakeFiles/EXP1.dir/exp1.c.o"
   "CMakeFiles/EXP1.dir/exp1.c.o.d"
   "CMakeFiles/EXP1.dir/util.c.o"

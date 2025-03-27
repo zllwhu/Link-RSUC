@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/root/Link-RSUC/src/exp1.c" "src/CMakeFiles/EXP1.dir/exp1.c.o" "gcc" "src/CMakeFiles/EXP1.dir/exp1.c.o.d"
-  "/root/Link-RSUC/src/util.c" "src/CMakeFiles/EXP1.dir/util.c.o" "gcc" "src/CMakeFiles/EXP1.dir/util.c.o.d"
+  "/home/zllwhu/Link-RSUC/src/exp1.c" "src/CMakeFiles/EXP1.dir/exp1.c.o" "gcc" "src/CMakeFiles/EXP1.dir/exp1.c.o.d"
+  "/home/zllwhu/Link-RSUC/src/util.c" "src/CMakeFiles/EXP1.dir/util.c.o" "gcc" "src/CMakeFiles/EXP1.dir/util.c.o.d"
   )
 
 # Targets to which this target links.
