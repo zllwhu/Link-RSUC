@@ -27,7 +27,7 @@ for i in range(runTimes):
     receiverL[i] = receiver_timeL
     auditorL[i] = auditor_timeL
 
-    res = subprocess.check_output('./RSUCEXP2', shell=True)
+    res = subprocess.check_output('./exp2', shell=True)
     res = res.decode('utf-8')
     res_split = res.splitlines()
 
