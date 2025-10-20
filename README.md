@@ -35,11 +35,13 @@ Besides, there are some libraries need to be installed:
     make
     sudo make install
     ```
-3. **secp256k1** is necessary for key generation:
+3. **secp256k1** is necessary for key generation, build with autotools:
     ```
     wget https://github.com/bitcoin-core/secp256k1/archive/refs/tags/v0.6.0.tar.gz
     tar -zxvf secp256k1-0.6.0.tar.gz
     cd secp256k1-0.6.0
+    ./autogen.sh
+    ./configure
     make
     sudo make install
     ```
