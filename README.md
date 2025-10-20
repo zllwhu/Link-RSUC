@@ -69,3 +69,37 @@ Please cite this project with:
 ```
 TBD
 ```
+
+# 5. Q&A
+### Problem Description  
+In Ubuntu, I compiled and installed the mcl library using `make` and `make install`. The shared library `libmcl.so.1` exists in `/usr/local/lib/`, but when executing another program, an error occurs:  
+`error while loading shared libraries: libmcl.so.1: cannot open shared object file: no such file or directory`  
+
+The CMake configuration for the program is as follows:  
+```cmake
+add_executable(EXP1 exp1.c util.c)
+add_executable(EXP2 exp2.c util.c)
+target_link_libraries(EXP1 /usr/local/lib/libtomcrypt.a /usr/local/lib/libmclbn256.so /usr/local/lib/libmcl.so /usr/local/lib/libsecp256k1.so)
+target_link_libraries(EXP2 /usr/local/lib/libtomcrypt.a /usr/local/lib/libmclbn256.so /usr/local/lib/libmcl.so /usr/local/lib/libsecp256k1.so)
+```  
+
+Note: Both `libmcl.so` and `libmcl.so.1` are symbolic links pointing to `/usr/local/lib/libmcl.so.1.74`.  
+
+
+### Solution  
+The error occurs because the system's dynamic linker (`ld.so`) cannot locate `libmcl.so.1`, even though the library exists in `/usr/local/lib`. This is typically because `/usr/local/lib` is not included in the dynamic linker's search path.  
+
+To resolve this:  
+
+1. **Permanently add `/usr/local/lib` to the dynamic linker's configuration**:  
+   Create a configuration file to specify the path and update the linker cache:  
+   ```bash
+   sudo sh -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/local.conf'
+   sudo ldconfig
+   ```  
+
+2. **Verify the fix**:  
+   Re-run the program. The dynamic linker will now recognize `libmcl.so.1` in `/usr/local/lib`.  
+
+
+This solution ensures `/usr/local/lib` is permanently recognized by the system's dynamic linker, resolving the "shared library not found" error.
