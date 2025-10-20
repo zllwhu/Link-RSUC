@@ -26,6 +26,7 @@ Besides, there are some libraries need to be installed:
     make
     sudo make install
     ```
+    Tips: Please use v2.14 version of mcl (`178f8bbe2f1e9ffcdec6e24aa11ae0b1d232b159`).
 2. **LibTomCrypt** is necessary for some hash functions:
     ```
     wget https://github.com/libtom/libtomcrypt/archive/refs/tags/v1.18.2.tar.gz
