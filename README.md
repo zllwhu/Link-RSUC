@@ -11,6 +11,7 @@ Before you begin, please make sure you have the following tools on your computer
 2. `autoconf` for creating Makefiles.
 3. `libtool` for building dynamic libraries.
 4. `libgmp-dev` for big integer calculation.
+5. `cmake` for making the project.
 
 
 Besides, there are some libraries need to be installed:
